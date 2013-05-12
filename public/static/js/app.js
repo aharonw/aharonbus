@@ -113,6 +113,44 @@ window.require.register("app", function(exports, require, module) {
   };
   
 });
+window.require.register("collections/buses-collection", function(exports, require, module) {
+  var _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  exports.BusesCollection = (function(_super) {
+    __extends(BusesCollection, _super);
+
+    function BusesCollection() {
+      _ref = BusesCollection.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return BusesCollection;
+
+  })(BackBone.Collection);
+  
+});
+window.require.register("models/bus-model", function(exports, require, module) {
+  var _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  exports.BusModel = (function(_super) {
+    __extends(BusModel, _super);
+
+    function BusModel() {
+      _ref = BusModel.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    BusModel.prototype.idAttribute = '_id';
+
+    return BusModel;
+
+  })(Backbone.Model);
+  
+});
 window.require.register("views/base-view", function(exports, require, module) {
   var _ref,
     __hasProp = {}.hasOwnProperty,

@@ -1,0 +1,1 @@
+class exports.BusesCollection extends BackBone.Collection
