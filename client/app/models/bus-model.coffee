@@ -1,3 +1,3 @@
-class exports.BusModel extends Backbone.Model
+class exports.Bus extends Backbone.Model
 
   idAttribute: '_id'

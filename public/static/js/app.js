@@ -80,55 +80,101 @@
 })();
 
 window.require.register("app", function(exports, require, module) {
-  var Commuter, GlobalView;
+  var Bus, Buses, Commuter, GlobalView;
+
+  Bus = require('models/bus-model').Bus;
+
+  Buses = require('collections/buses-collection').Buses;
 
   GlobalView = require('views/global-view').GlobalView;
 
   Commuter = (function() {
-    var domDef,
-      _this = this;
+    function Commuter() {
+      var domDef,
+        _this = this;
 
-    function Commuter() {}
-
-    domDef = $.Deferred();
-
-    Commuter.domReady = domDef.promise();
-
-    _.defer(function() {
-      Commuter.views = {
-        global: new GlobalView(Commuter)
-      };
-      return $(function() {
-        domDef.resolve();
-        return Commuter.$body = $(document.body);
+      domDef = $.Deferred();
+      this.domReady = domDef.promise();
+      this.buses = new Buses;
+      _.defer(function() {
+        _this.views = {
+          global: new GlobalView(_this)
+        };
+        return $(function() {
+          domDef.resolve();
+          return _this.$body = $(document.body);
+        });
       });
-    });
+    }
 
     return Commuter;
 
-  }).call(this);
+  })();
 
   module.exports = function() {
     return window.app = new Commuter;
   };
   
 });
-window.require.register("collections/buses-collection", function(exports, require, module) {
+window.require.register("collections/base-collection", function(exports, require, module) {
   var _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  exports.BusesCollection = (function(_super) {
-    __extends(BusesCollection, _super);
+  exports.BaseCollection = (function(_super) {
+    __extends(BaseCollection, _super);
 
-    function BusesCollection() {
-      _ref = BusesCollection.__super__.constructor.apply(this, arguments);
+    function BaseCollection() {
+      _ref = BaseCollection.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
-    return BusesCollection;
+    BaseCollection.prototype.path = 'http://api.wmata.com/';
 
-  })(BackBone.Collection);
+    return BaseCollection;
+
+  })(Backbone.Collection);
+  
+});
+window.require.register("collections/buses-collection", function(exports, require, module) {
+  var BaseCollection, Bus, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  BaseCollection = require('collections/base-collection').BaseCollection;
+
+  Bus = require('models/bus-model').Bus;
+
+  exports.Buses = (function(_super) {
+    __extends(Buses, _super);
+
+    function Buses() {
+      this.url = __bind(this.url, this);    _ref = Buses.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    Buses.prototype.model = Bus;
+
+    Buses.prototype.url = function() {
+      var apiKey, stopID, url;
+
+      apiKey = config.wmataKey;
+      stopID = 1001888;
+      url = path + 'NextBusService.svc/json/JPredictions?StopID=' + stopID + '&api_key=' + apiKey;
+      console.log(url);
+      return url;
+    };
+
+    return Buses;
+
+  })(BaseCollection);
+  
+});
+window.require.register("config", function(exports, require, module) {
+  window.config = {
+    wmataKey: 'jyauyx2uz4hur2pvbd4t5znd'
+  };
   
 });
 window.require.register("models/bus-model", function(exports, require, module) {
@@ -136,17 +182,17 @@ window.require.register("models/bus-model", function(exports, require, module) {
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  exports.BusModel = (function(_super) {
-    __extends(BusModel, _super);
+  exports.Bus = (function(_super) {
+    __extends(Bus, _super);
 
-    function BusModel() {
-      _ref = BusModel.__super__.constructor.apply(this, arguments);
+    function Bus() {
+      _ref = Bus.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
-    BusModel.prototype.idAttribute = '_id';
+    Bus.prototype.idAttribute = '_id';
 
-    return BusModel;
+    return Bus;
 
   })(Backbone.Model);
   
