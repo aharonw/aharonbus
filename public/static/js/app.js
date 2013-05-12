@@ -80,13 +80,15 @@
 })();
 
 window.require.register("app", function(exports, require, module) {
-  var Bus, Buses, Commuter, GlobalView;
+  var Commuter, GlobalView, Stop, StopView, Stops;
 
-  Bus = require('models/bus-model').Bus;
+  Stop = require('models/stop-model').Stop;
 
-  Buses = require('collections/buses-collection').Buses;
+  Stops = require('collections/stops-collection').Stops;
 
   GlobalView = require('views/global-view').GlobalView;
+
+  StopView = require('views/stop-view').StopView;
 
   Commuter = (function() {
     function Commuter() {
@@ -95,10 +97,11 @@ window.require.register("app", function(exports, require, module) {
 
       domDef = $.Deferred();
       this.domReady = domDef.promise();
-      this.buses = new Buses;
+      this.stops = new Stops;
       _.defer(function() {
         _this.views = {
-          global: new GlobalView(_this)
+          global: new GlobalView(_this),
+          stop: new StopView
         };
         return $(function() {
           domDef.resolve();
@@ -136,63 +139,68 @@ window.require.register("collections/base-collection", function(exports, require
   })(Backbone.Collection);
   
 });
-window.require.register("collections/buses-collection", function(exports, require, module) {
-  var BaseCollection, Bus, _ref,
+window.require.register("collections/stops-collection", function(exports, require, module) {
+  var BaseCollection, Stop, config, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   BaseCollection = require('collections/base-collection').BaseCollection;
 
-  Bus = require('models/bus-model').Bus;
+  Stop = require('models/stop-model').Stop;
 
-  exports.Buses = (function(_super) {
-    __extends(Buses, _super);
+  config = require('config').config;
 
-    function Buses() {
-      this.url = __bind(this.url, this);    _ref = Buses.__super__.constructor.apply(this, arguments);
+  exports.Stops = (function(_super) {
+    __extends(Stops, _super);
+
+    function Stops() {
+      this.url = __bind(this.url, this);    _ref = Stops.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
-    Buses.prototype.model = Bus;
+    Stops.prototype.model = Stop;
 
-    Buses.prototype.url = function() {
-      var apiKey, stopID, url;
+    Stops.prototype.url = function() {
+      var apiKey, stopID;
 
       apiKey = config.wmataKey;
       stopID = 1001888;
-      url = path + 'NextBusService.svc/json/JPredictions?StopID=' + stopID + '&api_key=' + apiKey;
-      console.log(url);
-      return url;
+      return this.path + 'NextBusService.svc/json/JPredictions?StopID=' + stopID + '&api_key=' + apiKey;
     };
 
-    return Buses;
+    Stops.prototype.initialize = function() {
+      this.fetch;
+      return this;
+    };
+
+    return Stops;
 
   })(BaseCollection);
   
 });
 window.require.register("config", function(exports, require, module) {
-  window.config = {
+  exports.config = {
     wmataKey: 'jyauyx2uz4hur2pvbd4t5znd'
   };
   
 });
-window.require.register("models/bus-model", function(exports, require, module) {
+window.require.register("models/stop-model", function(exports, require, module) {
   var _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  exports.Bus = (function(_super) {
-    __extends(Bus, _super);
+  exports.Stop = (function(_super) {
+    __extends(Stop, _super);
 
-    function Bus() {
-      _ref = Bus.__super__.constructor.apply(this, arguments);
+    function Stop() {
+      _ref = Stop.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
-    Bus.prototype.idAttribute = '_id';
+    Stop.prototype.idAttribute = '_id';
 
-    return Bus;
+    return Stop;
 
   })(Backbone.Model);
   
@@ -254,6 +262,26 @@ window.require.register("views/global-view", function(exports, require, module) 
     };
 
     return GlobalView;
+
+  })(BaseView);
+  
+});
+window.require.register("views/stop-view", function(exports, require, module) {
+  var BaseView, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  BaseView = require('views/base-view').BaseView;
+
+  exports.StopView = (function(_super) {
+    __extends(StopView, _super);
+
+    function StopView() {
+      _ref = StopView.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return StopView;
 
   })(BaseView);
   

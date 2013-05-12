@@ -70,7 +70,7 @@ a:hover {
 }
 @media (max-width: 979px) {
   #content {
-    margin-top: 2rem;
+    margin-top: 4rem;
   }
   .wrapper {
     max-width: 75rem;
@@ -79,11 +79,11 @@ a:hover {
 }
 @media (min-width: 481px) and (max-width: 979px) {
   #content {
-    margin-top: 0rem;
+    margin-top: 2rem;
   }
 }
 @media (max-width: 480px) {
   #content {
-    margin-top: 0rem;
+    margin-top: 2rem;
   }
 }

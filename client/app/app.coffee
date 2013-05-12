@@ -1,6 +1,8 @@
-{Bus}        = require 'models/bus-model'
-{Buses}      = require 'collections/buses-collection'
-{GlobalView} = require 'views/global-view'
+{Stop}        = require 'models/stop-model'
+{Stops}       = require 'collections/stops-collection'
+
+{GlobalView}  = require 'views/global-view'
+{StopView}    = require 'views/stop-view'
 
 class Commuter
   
@@ -9,12 +11,13 @@ class Commuter
     domDef = $.Deferred()
     @domReady = domDef.promise()
         
-    @buses = new Buses
+    @stops = new Stops
     
     _.defer =>
       
       @views = 
         global: new GlobalView @
+        stop:   new StopView
         
       $ =>
         domDef.resolve()
