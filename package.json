@@ -1,0 +1,21 @@
+{
+  "name": "commuter",
+  "version": "0.0.1",
+  "engines": {
+    "node": "0.8.x",
+    "npm":  "1.1.x"
+  },
+  "private": true,
+  "scripts": {
+    "start": "node app"
+  },
+  "dependencies": {
+    "express": "3.2.x",
+    "jade": "0.x.x",
+    "coffee-script": "~1.6.x",
+    "brunch": "~1.6.x"
+  },
+  "devDependencies": {
+    "node-dev": "2.x.x"
+  }
+}

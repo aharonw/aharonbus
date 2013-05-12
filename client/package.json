@@ -1,0 +1,16 @@
+{
+  "name": "wmata-client",
+  "version": "0.0.1",
+  "engines": {
+    "node": "0.10.x"
+  },
+  "dependencies": {
+    "javascript-brunch": "1.x.x",
+    "coffee-script-brunch": "1.x.x",
+    "css-brunch": "1.x.x",
+    "stylus-brunch": "<1.6.x",
+    "jade-brunch": "1.x.x",
+    "uglify-js-brunch": "1.x.x",
+    "clean-css-brunch": "1.x.x"
+  }
+}

@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+export NODE_ENV=development
+./node_modules/node-dev/bin/node-dev app.js

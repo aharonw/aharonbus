@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+cd client
+../node_modules/brunch/bin/brunch w

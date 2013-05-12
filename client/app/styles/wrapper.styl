@@ -1,0 +1,39 @@
+@import 'nib'
+
+#content
+  margin-top: 4rem
+  transition: opacity .8s
+  opacity: 1
+
+.wrapper
+  width: 124rem
+  margin: 0 auto
+  position: relative
+  text-align: center
+
+
+@media (min-width: 1275px)
+  #content
+    margin-top: 4rem
+
+@media (max-width: 1274px)
+  #content
+    margin-top: 4rem
+  .wrapper
+    width: 90rem
+    
+@media (max-width: 979px)
+  #content
+    margin-top: 2rem
+  .wrapper
+    max-width: 75rem
+    width: 96%
+
+@media (min-width: 481px) and (max-width: 979px)
+  #content
+    margin-top: 0rem
+
+@media (max-width: 480px)
+  #content
+    margin-top: 0rem
+
