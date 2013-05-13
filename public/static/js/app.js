@@ -132,7 +132,7 @@ window.require.register("collections/base-collection", function(exports, require
       return _ref;
     }
 
-    BaseCollection.prototype.path = 'http://api.wmata.com/';
+    BaseCollection.prototype.path = 'http://localhost:1234/';
 
     return BaseCollection;
 
@@ -170,7 +170,14 @@ window.require.register("collections/stops-collection", function(exports, requir
     };
 
     Stops.prototype.initialize = function() {
-      this.fetch;
+      console.log("init");
+      this.fetch();
+      return this;
+    };
+
+    Stops.prototype.reset = function() {
+      Stops.__super__.reset.apply(this, arguments);
+      console.log("RESET");
       return this;
     };
 

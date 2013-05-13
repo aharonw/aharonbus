@@ -12,5 +12,11 @@ class exports.Stops extends BaseCollection
     return @path + 'NextBusService.svc/json/JPredictions?StopID=' + stopID + '&api_key=' + apiKey
   
   initialize: ->
-    @fetch
+    console.log "init"
+    @fetch()
+    @
+  
+  reset: ->
+    super
+    console.log "RESET"
     @
