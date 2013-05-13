@@ -165,20 +165,26 @@ window.require.register("collections/stops-collection", function(exports, requir
       var apiKey, stopID;
 
       apiKey = config.wmataKey;
-      stopID = 1001888;
+      stopID = 1001861;
       return this.path + 'NextBusService.svc/json/JPredictions?StopID=' + stopID + '&api_key=' + apiKey;
     };
 
     Stops.prototype.initialize = function() {
-      console.log("init");
-      this.fetch();
+      this.fetch({
+        success: this.showShit,
+        error: this.awful
+      });
       return this;
     };
 
-    Stops.prototype.reset = function() {
-      Stops.__super__.reset.apply(this, arguments);
-      console.log("RESET");
-      return this;
+    Stops.prototype.showShit = function(collection, response, options) {
+      console.log("YES");
+      return console.log(collection, response, options);
+    };
+
+    Stops.prototype.awful = function(collection, response, options) {
+      console.log("NO");
+      return console.log(collection, response);
     };
 
     return Stops;

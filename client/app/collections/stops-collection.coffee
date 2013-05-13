@@ -8,15 +8,19 @@ class exports.Stops extends BaseCollection
   
   url: =>
     apiKey = config.wmataKey
-    stopID = 1001888
+    stopID = 1001861
     return @path + 'NextBusService.svc/json/JPredictions?StopID=' + stopID + '&api_key=' + apiKey
   
   initialize: ->
-    console.log "init"
-    @fetch()
+    @fetch 
+      success : @showShit
+      error   : @awful
     @
   
-  reset: ->
-    super
-    console.log "RESET"
-    @
+  showShit: (collection, response, options) ->
+    console.log "YES"
+    console.log collection, response, options
+  
+  awful: (collection, response, options) ->
+    console.log "NO"
+    console.log collection, response
