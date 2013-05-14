@@ -23,13 +23,14 @@ http.createServer (proxyReq, proxyRes) ->
       headers['Access-Control-Allow-Origin'] = '*'
       headers['Access-Control-Allow-Headers'] = 'X-Requested-With'
       proxyRes.writeHead 200, headers
-    
+      
+      data = ""
+      
       res.on 'data', (chunk) ->
-        console.log chunk
-        console.log "Body: " + chunk
-        proxyRes.write chunk
+        data = data + chunk
       
       res.on 'end', ->
+        proxyRes.write data
         proxyRes.end()
         
     req.on 'error', (e) ->
