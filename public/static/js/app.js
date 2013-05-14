@@ -178,13 +178,12 @@ window.require.register("collections/stops-collection", function(exports, requir
     };
 
     Stops.prototype.showShit = function(collection, response, options) {
-      console.log("YES");
-      return console.log(collection, response, options);
+      return console.log("YES");
     };
 
     Stops.prototype.awful = function(collection, response, options) {
-      console.log("NO");
-      return console.log(collection, response);
+      response = response.responseText;
+      return console.log(response);
     };
 
     return Stops;

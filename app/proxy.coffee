@@ -25,11 +25,13 @@ http.createServer (proxyReq, proxyRes) ->
       proxyRes.writeHead 200, headers
     
       res.on 'data', (chunk) ->
+        console.log chunk
+        console.log "Body: " + chunk
         proxyRes.write chunk
       
       res.on 'end', ->
         proxyRes.end()
-    
+        
     req.on 'error', (e) ->
       console.log 'problem with request: ' + e.message
       proxyRes.writeHead 503

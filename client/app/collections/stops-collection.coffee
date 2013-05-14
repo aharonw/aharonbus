@@ -19,8 +19,8 @@ class exports.Stops extends BaseCollection
   
   showShit: (collection, response, options) ->
     console.log "YES"
-    console.log collection, response, options
   
   awful: (collection, response, options) ->
-    console.log "NO"
-    console.log collection, response
+    response = response.responseText
+
+    console.log response
