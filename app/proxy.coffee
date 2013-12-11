@@ -23,6 +23,7 @@ http.createServer (proxyReq, proxyRes) ->
       headers['Access-Control-Allow-Origin'] = '*'
       headers['Access-Control-Allow-Headers'] = 'X-Requested-With'
       headers['Content-Type'] = 'application/json'
+      headers['Transfer-Encoding'] = 'chunked'
       proxyRes.writeHead 200, headers
       
       data = ""
@@ -32,7 +33,6 @@ http.createServer (proxyReq, proxyRes) ->
       
       res.on 'end', ->
         console.log data.toString()
-        proxyRes.write data
         proxyRes.end data
         
     req.on 'error', (e) ->

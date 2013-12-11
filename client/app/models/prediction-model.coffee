@@ -1,0 +1,1 @@
+class exports.Prediction extends Backbone.Model

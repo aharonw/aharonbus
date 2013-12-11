@@ -5,23 +5,24 @@
 {StopView}    = require 'views/stop-view'
 
 class Commuter
-  
+
   constructor: ->
-    
+
     domDef = $.Deferred()
     @domReady = domDef.promise()
-        
+
     @stops = new Stops
-    
+
     _.defer =>
-      
-      @views = 
+
+      @views =
         global: new GlobalView @
-        stop:   new StopView
-        
+        stop:   new StopView collection: @stops
+
       $ =>
         domDef.resolve()
         @$body = $ document.body
+        @views.global.addStopView()
 
 
 module.exports = -> window.app = new Commuter

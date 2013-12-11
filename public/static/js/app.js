@@ -101,11 +101,14 @@ window.require.register("app", function(exports, require, module) {
       _.defer(function() {
         _this.views = {
           global: new GlobalView(_this),
-          stop: new StopView
+          stop: new StopView({
+            collection: _this.stops
+          })
         };
         return $(function() {
           domDef.resolve();
-          return _this.$body = $(document.body);
+          _this.$body = $(document.body);
+          return _this.views.global.addStopView();
         });
       });
     }
@@ -178,7 +181,10 @@ window.require.register("collections/stops-collection", function(exports, requir
     };
 
     Stops.prototype.showShit = function(collection, response, options) {
-      return console.log("YES");
+      var stop;
+
+      stop = collection.toJSON()[0];
+      return app.views.stop.render(collection.first()).el;
     };
 
     Stops.prototype.awful = function(collection, response, options) {
@@ -195,6 +201,24 @@ window.require.register("config", function(exports, require, module) {
   exports.config = {
     wmataKey: 'jyauyx2uz4hur2pvbd4t5znd'
   };
+  
+});
+window.require.register("models/prediction-model", function(exports, require, module) {
+  var _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  exports.Prediction = (function(_super) {
+    __extends(Prediction, _super);
+
+    function Prediction() {
+      _ref = Prediction.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return Prediction;
+
+  })(Backbone.Model);
   
 });
 window.require.register("models/stop-model", function(exports, require, module) {
@@ -270,7 +294,12 @@ window.require.register("views/global-view", function(exports, require, module) 
 
     GlobalView.prototype.render = function() {
       this.$el.html(this.template());
+      this.$logo = this.$('#logo');
       return this;
+    };
+
+    GlobalView.prototype.addStopView = function() {
+      return this.$el.append(app.views.stop.el);
     };
 
     return GlobalView;
@@ -278,12 +307,46 @@ window.require.register("views/global-view", function(exports, require, module) 
   })(BaseView);
   
 });
-window.require.register("views/stop-view", function(exports, require, module) {
-  var BaseView, _ref,
+window.require.register("views/prediction-view", function(exports, require, module) {
+  var BaseView, Prediction, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   BaseView = require('views/base-view').BaseView;
+
+  Prediction = require('models/prediction-model').Prediction;
+
+  exports.PredictionView = (function(_super) {
+    __extends(PredictionView, _super);
+
+    function PredictionView() {
+      _ref = PredictionView.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    PredictionView.prototype.tagName = 'li';
+
+    PredictionView.prototype["class"] = 'prediction';
+
+    PredictionView.prototype.templateName = 'prediction';
+
+    PredictionView.prototype.model = Prediction;
+
+    return PredictionView;
+
+  })(BaseView);
+  
+});
+window.require.register("views/stop-view", function(exports, require, module) {
+  var BaseView, PredictionView, Stop, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Stop = require('models/stop-model').Stop;
+
+  BaseView = require('views/base-view').BaseView;
+
+  PredictionView = require('views/prediction-view').PredictionView;
 
   exports.StopView = (function(_super) {
     __extends(StopView, _super);
@@ -292,6 +355,40 @@ window.require.register("views/stop-view", function(exports, require, module) {
       _ref = StopView.__super__.constructor.apply(this, arguments);
       return _ref;
     }
+
+    StopView.prototype.id = 'stop';
+
+    StopView.prototype.Model = Stop;
+
+    StopView.prototype.SubView = PredictionView;
+
+    StopView.prototype.templateName = 'predictions';
+
+    StopView.prototype.render = function(data) {
+      var fragment, prediction, _i, _len, _ref1;
+
+      StopView.__super__.render.apply(this, arguments);
+      this.stopName = data.get('StopName');
+      this.predictions = data.get('Predictions');
+      console.log(this.predictions);
+      this.subViews = [];
+      this.$predictionList = this.$('#predictionList');
+      fragment = document.createDocumentFragment();
+      _ref1 = this.predictions;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        prediction = _ref1[_i];
+        fragment.appendChild(this.makeSubView(prediction));
+      }
+      this.$predictionList.append(fragment);
+      return this;
+    };
+
+    StopView.prototype.makeSubView = function(prediction) {
+      var subView;
+
+      this.subViews.push(subView = new this.SubView(prediction));
+      return subView.render().el;
+    };
 
     return StopView;
 
@@ -305,6 +402,27 @@ window.require.register("views/templates/global", function(exports, require, mod
   with (locals || {}) {
   var interp;
   buf.push('<div class="wrapper"><div id="logo"><img src="/static/images/aharonbus.svg"/></div></div>');
+  }
+  return buf.join("");
+  };
+});
+window.require.register("views/templates/prediction", function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  }
+  return buf.join("");
+  };
+});
+window.require.register("views/templates/predictions", function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow, merge) {
+  attrs = attrs || jade.attrs; escape = escape || jade.escape; rethrow = rethrow || jade.rethrow; merge = merge || jade.merge;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<ul id="predictionList"></ul>');
   }
   return buf.join("");
   };
