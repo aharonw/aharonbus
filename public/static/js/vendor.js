@@ -37,28 +37,29 @@
     return function(name) {
       var dir = dirname(path);
       var absolute = expand(dir, name);
-      return globals.require(absolute);
+      return globals.require(absolute, path);
     };
   };
 
   var initModule = function(name, definition) {
     var module = {id: name, exports: {}};
+    cache[name] = module;
     definition(module.exports, localRequire(name), module);
-    var exports = cache[name] = module.exports;
-    return exports;
+    return module.exports;
   };
 
-  var require = function(name) {
+  var require = function(name, loaderPath) {
     var path = expand(name, '.');
+    if (loaderPath == null) loaderPath = '/';
 
-    if (has(cache, path)) return cache[path];
+    if (has(cache, path)) return cache[path].exports;
     if (has(modules, path)) return initModule(path, modules[path]);
 
     var dirIndex = expand(path, './index');
-    if (has(cache, dirIndex)) return cache[dirIndex];
+    if (has(cache, dirIndex)) return cache[dirIndex].exports;
     if (has(modules, dirIndex)) return initModule(dirIndex, modules[dirIndex]);
 
-    throw new Error('Cannot find module "' + name + '"');
+    throw new Error('Cannot find module "' + name + '" from '+ '"' + loaderPath + '"');
   };
 
   var define = function(bundle, fn) {
@@ -73,12 +74,22 @@
     }
   };
 
+  var list = function() {
+    var result = [];
+    for (var item in modules) {
+      if (has(modules, item)) {
+        result.push(item);
+      }
+    }
+    return result;
+  };
+
   globals.require = require;
   globals.require.define = define;
   globals.require.register = define;
+  globals.require.list = list;
   globals.require.brunch = true;
 })();
-
 /*!
  * jQuery JavaScript Library v2.0.0
  * http://jquery.com/
@@ -8833,8 +8844,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     window.jQuery = window.$ = jQuery;
 }
 
-})( window );;
-// Underscore.js 1.4.4
+})( window );
+;// Underscore.js 1.4.4
 // ===================
 
 // > http://underscorejs.org
@@ -10060,8 +10071,8 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
 
   });
 
-}).call(this);;
-//     Backbone.js 1.0.0
+}).call(this);
+;//     Backbone.js 1.0.0
 
 //     (c) 2010-2013 Jeremy Ashkenas, DocumentCloud Inc.
 //     Backbone may be freely distributed under the MIT license.
@@ -11631,40 +11642,9 @@ if ( typeof window === "object" && typeof window.document === "object" ) {
     };
   };
 
-}).call(this);;
-
-jade = (function(exports){
-/*!
- * Jade - runtime
- * Copyright(c) 2010 TJ Holowaychuk <tj@vision-media.ca>
- * MIT Licensed
- */
-
-/**
- * Lame Array.isArray() polyfill for now.
- */
-
-if (!Array.isArray) {
-  Array.isArray = function(arr){
-    return '[object Array]' == Object.prototype.toString.call(arr);
-  };
-}
-
-/**
- * Lame Object.keys() polyfill for now.
- */
-
-if (!Object.keys) {
-  Object.keys = function(obj){
-    var arr = [];
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        arr.push(key);
-      }
-    }
-    return arr;
-  }
-}
+}).call(this);
+;!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.jade=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
 
 /**
  * Merge two attribute objects giving precedence
@@ -11679,6 +11659,13 @@ if (!Object.keys) {
  */
 
 exports.merge = function merge(a, b) {
+  if (arguments.length === 1) {
+    var attrs = a[0];
+    for (var i = 1; i < a.length; i++) {
+      attrs = merge(attrs, a[i]);
+    }
+    return attrs;
+  }
   var ac = a['class'];
   var bc = b['class'];
 
@@ -11687,9 +11674,7 @@ exports.merge = function merge(a, b) {
     bc = bc || [];
     if (!Array.isArray(ac)) ac = [ac];
     if (!Array.isArray(bc)) bc = [bc];
-    ac = ac.filter(nulls);
-    bc = bc.filter(nulls);
-    a['class'] = ac.concat(bc).join(' ');
+    a['class'] = ac.concat(bc).filter(nulls);
   }
 
   for (var key in b) {
@@ -11704,14 +11689,74 @@ exports.merge = function merge(a, b) {
 /**
  * Filter null `val`s.
  *
- * @param {Mixed} val
- * @return {Mixed}
+ * @param {*} val
+ * @return {Boolean}
  * @api private
  */
 
 function nulls(val) {
-  return val != null;
+  return val != null && val !== '';
 }
+
+/**
+ * join array as classes.
+ *
+ * @param {*} val
+ * @return {String}
+ */
+exports.joinClasses = joinClasses;
+function joinClasses(val) {
+  return Array.isArray(val) ? val.map(joinClasses).filter(nulls).join(' ') : val;
+}
+
+/**
+ * Render the given classes.
+ *
+ * @param {Array} classes
+ * @param {Array.<Boolean>} escaped
+ * @return {String}
+ */
+exports.cls = function cls(classes, escaped) {
+  var buf = [];
+  for (var i = 0; i < classes.length; i++) {
+    if (escaped && escaped[i]) {
+      buf.push(exports.escape(joinClasses([classes[i]])));
+    } else {
+      buf.push(joinClasses(classes[i]));
+    }
+  }
+  var text = joinClasses(buf);
+  if (text.length) {
+    return ' class="' + text + '"';
+  } else {
+    return '';
+  }
+};
+
+/**
+ * Render the given attribute.
+ *
+ * @param {String} key
+ * @param {String} val
+ * @param {Boolean} escaped
+ * @param {Boolean} terse
+ * @return {String}
+ */
+exports.attr = function attr(key, val, escaped, terse) {
+  if ('boolean' == typeof val || null == val) {
+    if (val) {
+      return ' ' + (terse ? key : key + '="' + key + '"');
+    } else {
+      return '';
+    }
+  } else if (0 == key.indexOf('data') && 'string' != typeof val) {
+    return ' ' + key + "='" + JSON.stringify(val).replace(/'/g, '&apos;') + "'";
+  } else if (escaped) {
+    return ' ' + key + '="' + exports.escape(val) + '"';
+  } else {
+    return ' ' + key + '="' + val + '"';
+  }
+};
 
 /**
  * Render the given attributes object.
@@ -11719,42 +11764,28 @@ function nulls(val) {
  * @param {Object} obj
  * @param {Object} escaped
  * @return {String}
- * @api private
  */
+exports.attrs = function attrs(obj, terse){
+  var buf = [];
 
-exports.attrs = function attrs(obj, escaped){
-  var buf = []
-    , terse = obj.terse;
+  var keys = Object.keys(obj);
 
-  delete obj.terse;
-  var keys = Object.keys(obj)
-    , len = keys.length;
-
-  if (len) {
-    buf.push('');
-    for (var i = 0; i < len; ++i) {
+  if (keys.length) {
+    for (var i = 0; i < keys.length; ++i) {
       var key = keys[i]
         , val = obj[key];
 
-      if ('boolean' == typeof val || null == val) {
-        if (val) {
-          terse
-            ? buf.push(key)
-            : buf.push(key + '="' + key + '"');
+      if ('class' == key) {
+        if (val = joinClasses(val)) {
+          buf.push(' ' + key + '="' + val + '"');
         }
-      } else if (0 == key.indexOf('data') && 'string' != typeof val) {
-        buf.push(key + "='" + JSON.stringify(val) + "'");
-      } else if ('class' == key && Array.isArray(val)) {
-        buf.push(key + '="' + exports.escape(val.join(' ')) + '"');
-      } else if (escaped && escaped[key]) {
-        buf.push(key + '="' + exports.escape(val) + '"');
       } else {
-        buf.push(key + '="' + val + '"');
+        buf.push(exports.attr(key, val, false, terse));
       }
     }
   }
 
-  return buf.join(' ');
+  return buf.join('');
 };
 
 /**
@@ -11766,11 +11797,13 @@ exports.attrs = function attrs(obj, escaped){
  */
 
 exports.escape = function escape(html){
-  return String(html)
-    .replace(/&(?!(\w+|\#\d+);)/g, '&amp;')
+  var result = String(html)
+    .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+  if (result === '' + html) return html;
+  else return result;
 };
 
 /**
@@ -11783,11 +11816,18 @@ exports.escape = function escape(html){
  * @api private
  */
 
-exports.rethrow = function rethrow(err, filename, lineno){
-  if (!filename) throw err;
-
+exports.rethrow = function rethrow(err, filename, lineno, str){
+  if (!(err instanceof Error)) throw err;
+  if ((typeof window != 'undefined' || !filename) && !str) {
+    err.message += ' on line ' + lineno;
+    throw err;
+  }
+  try {
+    str =  str || require('fs').readFileSync(filename, 'utf8')
+  } catch (ex) {
+    rethrow(err, null, lineno)
+  }
   var context = 3
-    , str = require('fs').readFileSync(filename, 'utf8')
     , lines = str.split('\n')
     , start = Math.max(lineno - context, 0)
     , end = Math.min(lines.length, lineno + context);
@@ -11808,7 +11848,10 @@ exports.rethrow = function rethrow(err, filename, lineno){
   throw err;
 };
 
-  return exports;
+},{"fs":2}],2:[function(require,module,exports){
 
-})({});
+},{}]},{},[1])
+(1)
+});
 ;
+//# sourceMappingURL=vendor.js.map

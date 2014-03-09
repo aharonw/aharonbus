@@ -38,6 +38,8 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+
 #content {
   margin-top: 4rem;
   -webkit-transition: opacity 0.8s;
@@ -87,3 +89,6 @@ a:hover {
     margin-top: 2rem;
   }
 }
+
+
+/*# sourceMappingURL=app.css.map*/

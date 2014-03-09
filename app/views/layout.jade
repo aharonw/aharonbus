@@ -1,4 +1,4 @@
-!!!
+doctype html
 html(lang='en')
   head
     meta(charset='utf-8')
@@ -21,5 +21,5 @@ html(lang='en')
     
     script(src='/static/js/vendor.js')
     script(src='/static/js/app.js')
-    script
+    script.
       require('app')(!{ JSON.stringify(locals.models) });
