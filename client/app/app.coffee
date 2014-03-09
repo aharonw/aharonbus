@@ -11,7 +11,7 @@ class Commuter
     domDef = $.Deferred()
     @domReady = domDef.promise()
 
-    @stops = new Stops
+    @stops = new Stops 1001861
 
     _.defer =>
 

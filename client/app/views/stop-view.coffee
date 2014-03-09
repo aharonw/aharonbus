@@ -13,9 +13,9 @@ class exports.StopView extends BaseView
     super
     @stopName        = data.get 'StopName'
     @predictions     = data.get 'Predictions'
-    console.log @predictions
+
     @subViews        = []
-    @$predictionList = @$ '#predictionList'
+    @$predictionList = @$ '#prediction-list'
     fragment         = document.createDocumentFragment()
 
     for prediction in @predictions

@@ -7,3 +7,9 @@ class exports.PredictionView extends BaseView
   class: 'prediction'
   templateName: 'prediction'
   model: Prediction
+
+  initialize: (@prediction) ->
+
+  render: ->
+    super prediction: @prediction
+    @

@@ -40,8 +40,26 @@ a:hover {
 }
 
 
+body {
+  padding: 20px;
+}
+ul#prediction-list li {
+  width: 150px;
+  height: 150px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 65px;
+  text-align: center;
+  padding: 30px;
+  background-color: #ddd;
+  border: 1px solid #bbb;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  float: left;
+}
+
 #content {
-  margin-top: 4rem;
+  margin-top: 0rem;
   -webkit-transition: opacity 0.8s;
   -moz-transition: opacity 0.8s;
   -o-transition: opacity 0.8s;
@@ -56,38 +74,6 @@ a:hover {
   margin: 0 auto;
   position: relative;
   text-align: center;
-}
-@media (min-width: 1275px) {
-  #content {
-    margin-top: 4rem;
-  }
-}
-@media (max-width: 1274px) {
-  #content {
-    margin-top: 4rem;
-  }
-  .wrapper {
-    width: 90rem;
-  }
-}
-@media (max-width: 979px) {
-  #content {
-    margin-top: 4rem;
-  }
-  .wrapper {
-    max-width: 75rem;
-    width: 96%;
-  }
-}
-@media (min-width: 481px) and (max-width: 979px) {
-  #content {
-    margin-top: 2rem;
-  }
-}
-@media (max-width: 480px) {
-  #content {
-    margin-top: 2rem;
-  }
 }
 
 

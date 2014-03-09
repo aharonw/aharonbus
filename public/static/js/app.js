@@ -106,7 +106,7 @@ Commuter = (function() {
     var domDef;
     domDef = $.Deferred();
     this.domReady = domDef.promise();
-    this.stops = new Stops;
+    this.stops = new Stops(1001861);
     _.defer((function(_this) {
       return function() {
         _this.views = {
@@ -173,23 +173,41 @@ exports.Stops = (function(_super) {
 
   Stops.prototype.model = Stop;
 
+  Stops.prototype.delay = 20000;
+
   Stops.prototype.url = function() {
     var apiKey, stopID;
     apiKey = config.wmataKey;
-    stopID = 1001861;
+    stopID = this.stopID;
     return this.path + 'NextBusService.svc/json/JPredictions?StopID=' + stopID + '&api_key=' + apiKey;
   };
 
-  Stops.prototype.initialize = function() {
-    this.fetch({
+  Stops.prototype.initialize = function(stopID) {
+    this.stopID = stopID;
+    this.poll();
+    return this;
+  };
+
+  Stops.prototype.poll = function(delay) {
+    return setInterval((function(_this) {
+      return function() {
+        _this.updatePredictions();
+        return console.log('fetch');
+      };
+    })(this), 10000);
+  };
+
+  Stops.prototype.updatePredictions = function() {
+    console.log('update');
+    return this.fetch({
       success: this.showShit,
       error: this.awful
     });
-    return this;
   };
 
   Stops.prototype.showShit = function(collection, response, options) {
     var stop;
+    console.log("fetched");
     stop = collection.toJSON()[0];
     return app.views.stop.render(collection.first()).el;
   };
@@ -332,6 +350,17 @@ exports.PredictionView = (function(_super) {
 
   PredictionView.prototype.model = Prediction;
 
+  PredictionView.prototype.initialize = function(prediction) {
+    this.prediction = prediction;
+  };
+
+  PredictionView.prototype.render = function() {
+    PredictionView.__super__.render.call(this, {
+      prediction: this.prediction
+    });
+    return this;
+  };
+
   return PredictionView;
 
 })(BaseView);
@@ -368,9 +397,8 @@ exports.StopView = (function(_super) {
     StopView.__super__.render.apply(this, arguments);
     this.stopName = data.get('StopName');
     this.predictions = data.get('Predictions');
-    console.log(this.predictions);
     this.subViews = [];
-    this.$predictionList = this.$('#predictionList');
+    this.$predictionList = this.$('#prediction-list');
     fragment = document.createDocumentFragment();
     _ref = this.predictions;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -398,7 +426,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<div class=\"wrapper\"><div id=\"logo\"><img src=\"/static/images/aharonbus.svg\"/></div></div>");;return buf.join("");
+buf.push("<div class=\"wrapper\"></div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -416,8 +444,8 @@ var __templateData = function template(locals) {
 var buf = [];
 var jade_mixins = {};
 var jade_interp;
-
-;return buf.join("");
+var locals_ = (locals || {}),prediction = locals_.prediction;
+buf.push("<div class=\"minutes\">" + (jade.escape((jade_interp = prediction.Minutes) == null ? '' : jade_interp)) + "</div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -436,7 +464,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 
-buf.push("<ul id=\"predictionList\"></ul>");;return buf.join("");
+buf.push("<ul id=\"prediction-list\"></ul>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
