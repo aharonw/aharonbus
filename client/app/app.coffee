@@ -1,28 +1,32 @@
-{Stop}        = require 'models/stop-model'
-{Stops}       = require 'collections/stops-collection'
+{Router}          = require 'lib/router'
 
-{GlobalView}  = require 'views/global-view'
-{StopView}    = require 'views/stop-view'
+{Stop}            = require 'models/stop-model'
+{Predictions}     = require 'collections/predictions-collection'
+
+{GlobalView}      = require 'views/global-view'
+{PredictionsView} = require 'views/predictions-view'
 
 class Commuter
 
   constructor: ->
-
-    domDef = $.Deferred()
+    domDef    = $.Deferred()
     @domReady = domDef.promise()
-
-    @stops = new Stops 1001861
+    @router   = new Router
 
     _.defer =>
 
       @views =
-        global: new GlobalView @
-        stop:   new StopView collection: @stops
+        global:      new GlobalView @
+        predictions: new PredictionsView collection: @stops
 
       $ =>
         domDef.resolve()
         @$body = $ document.body
-        @views.global.addStopView()
+        Backbone.history.start pushState: true
+        @views.global.addPredictionsView()
 
+
+  getPredictions: (stops) ->
+    @predictions = new Predictions stops
 
 module.exports = -> window.app = new Commuter

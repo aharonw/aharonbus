@@ -2,17 +2,15 @@
 {BaseView}       = require 'views/base-view'
 {PredictionView} = require 'views/prediction-view'
 
-class exports.StopView extends BaseView
+class exports.PredictionsView extends BaseView
 
-  id: 'stop'
-  Model: Stop
-  SubView: PredictionView
+  id: 'predictions'
   templateName: 'predictions'
+  SubView: PredictionView
+  Model: Stop
 
-  render: (data) ->
+  render: (@predictions) ->
     super
-    @stopName        = data.get 'StopName'
-    @predictions     = data.get 'Predictions'
 
     @subViews        = []
     @$predictionList = @$ '#prediction-list'

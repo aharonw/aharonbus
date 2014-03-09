@@ -11,7 +11,12 @@ class exports.GlobalView extends BaseView
   render: =>
     @$el.html @template()
     @$logo = @$ '#logo'
+    @$wrapper = @$ '.wrapper'
     @
 
-  addStopView: ->
-    @$el.append app.views.stop.el
+
+  showPredictions: (stops) ->
+    console.log stops
+
+  addPredictionsView: ->
+    @$wrapper.append app.views.predictions.el

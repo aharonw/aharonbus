@@ -70,7 +70,9 @@ ul#prediction-list li {
   filter: none;
 }
 .wrapper {
-  width: 124rem;
+  max-width: 480px;
+  min-height: 200px;
+  border: 1px solid #eee;
   margin: 0 auto;
   position: relative;
   text-align: center;

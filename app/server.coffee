@@ -13,6 +13,10 @@ app.configure ->
   app.use express.bodyParser()
   app.use express.methodOverride()
   #app.use express.favicon './public/favicon.ico?v=2'
+
+  app.use require('express-spa-router') app,
+    ignore:      ['s', 'e']
+
   app.use app.router
   app.use express.static __dirname + '/../public'
   
@@ -21,6 +25,7 @@ app.configure 'development', ->
   app.use express.errorHandler()
   
 app.get '/', routes.index
+app.get '/:stops', routes.predictions
 
 http.createServer(app).listen app.get('port'), ->
   console.log '\x1b[32mCOMMUTER-ONLINE\x1b[0m'

@@ -91,38 +91,47 @@
   globals.require.brunch = true;
 })();
 require.register("app", function(exports, require, module) {
-var Commuter, GlobalView, Stop, StopView, Stops;
+var Commuter, GlobalView, Predictions, PredictionsView, Router, Stop;
+
+Router = require('lib/router').Router;
 
 Stop = require('models/stop-model').Stop;
 
-Stops = require('collections/stops-collection').Stops;
+Predictions = require('collections/predictions-collection').Predictions;
 
 GlobalView = require('views/global-view').GlobalView;
 
-StopView = require('views/stop-view').StopView;
+PredictionsView = require('views/predictions-view').PredictionsView;
 
 Commuter = (function() {
   function Commuter() {
     var domDef;
     domDef = $.Deferred();
     this.domReady = domDef.promise();
-    this.stops = new Stops(1001861);
+    this.router = new Router;
     _.defer((function(_this) {
       return function() {
         _this.views = {
           global: new GlobalView(_this),
-          stop: new StopView({
+          predictions: new PredictionsView({
             collection: _this.stops
           })
         };
         return $(function() {
           domDef.resolve();
           _this.$body = $(document.body);
-          return _this.views.global.addStopView();
+          Backbone.history.start({
+            pushState: true
+          });
+          return _this.views.global.addPredictionsView();
         });
       };
     })(this));
   }
+
+  Commuter.prototype.getPredictions = function(stops) {
+    return this.predictions = new Predictions(stops);
+  };
 
   return Commuter;
 
@@ -151,7 +160,7 @@ exports.BaseCollection = (function(_super) {
 })(Backbone.Collection);
 });
 
-;require.register("collections/stops-collection", function(exports, require, module) {
+;require.register("collections/predictions-collection", function(exports, require, module) {
 var BaseCollection, Stop, config,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
@@ -163,41 +172,61 @@ Stop = require('models/stop-model').Stop;
 
 config = require('config').config;
 
-exports.Stops = (function(_super) {
-  __extends(Stops, _super);
+exports.Predictions = (function(_super) {
+  __extends(Predictions, _super);
 
-  function Stops() {
+  function Predictions() {
     this.url = __bind(this.url, this);
-    return Stops.__super__.constructor.apply(this, arguments);
+    return Predictions.__super__.constructor.apply(this, arguments);
   }
 
-  Stops.prototype.model = Stop;
+  Predictions.prototype.model = Stop;
 
-  Stops.prototype.delay = 20000;
+  Predictions.prototype.delay = 20000;
 
-  Stops.prototype.url = function() {
+  Predictions.prototype.url = function() {
     var apiKey, stopID;
     apiKey = config.wmataKey;
     stopID = this.stopID;
+    console.log(this.path);
     return this.path + 'NextBusService.svc/json/JPredictions?StopID=' + stopID + '&api_key=' + apiKey;
   };
 
-  Stops.prototype.initialize = function(stopID) {
-    this.stopID = stopID;
-    this.poll();
+  Predictions.prototype.initialize = function(stopIDs) {
+    this.stopIDs = stopIDs;
+    this.fetchPredictions(this.stopIDs.split('+'));
     return this;
   };
 
-  Stops.prototype.poll = function(delay) {
-    return setInterval((function(_this) {
+  Predictions.prototype.fetchPredictions = function(ids) {
+    return async.map(ids, this.queryStop, (function(_this) {
+      return function(err, results) {
+        _this.showShit(results);
+        return _this.poll();
+      };
+    })(this));
+  };
+
+  Predictions.prototype.queryStop = function(id, cb) {
+    var apiKey, stopID, url;
+    apiKey = config.wmataKey;
+    stopID = this.stopID;
+    url = 'http://localhost:1234/' + 'NextBusService.svc/json/JPredictions?StopID=' + id + '&api_key=' + apiKey;
+    return $.get(url, function(data) {
+      return cb(null, data);
+    });
+  };
+
+  Predictions.prototype.poll = function() {
+    return setTimeout((function(_this) {
       return function() {
-        _this.updatePredictions();
+        _this.fetchPredictions(_this.stopIDs.split('+'));
         return console.log('fetch');
       };
     })(this), 10000);
   };
 
-  Stops.prototype.updatePredictions = function() {
+  Predictions.prototype.updatePredictions = function() {
     console.log('update');
     return this.fetch({
       success: this.showShit,
@@ -205,19 +234,28 @@ exports.Stops = (function(_super) {
     });
   };
 
-  Stops.prototype.showShit = function(collection, response, options) {
-    var stop;
-    console.log("fetched");
-    stop = collection.toJSON()[0];
-    return app.views.stop.render(collection.first()).el;
+  Predictions.prototype.showShit = function(stops) {
+    var p, prediction, stop, _i, _j, _len, _len1, _ref;
+    this.predictions = [];
+    for (_i = 0, _len = stops.length; _i < _len; _i++) {
+      stop = stops[_i];
+      _ref = stop.Predictions;
+      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+        prediction = _ref[_j];
+        p = prediction;
+        p.stop = stop.StopName;
+        this.predictions.push(p);
+      }
+    }
+    return app.views.predictions.render(this.predictions).el;
   };
 
-  Stops.prototype.awful = function(collection, response, options) {
+  Predictions.prototype.awful = function(collection, response, options) {
     response = response.responseText;
     return console.log(response);
   };
 
-  return Stops;
+  return Predictions;
 
 })(BaseCollection);
 });
@@ -226,6 +264,41 @@ exports.Stops = (function(_super) {
 exports.config = {
   wmataKey: 'jyauyx2uz4hur2pvbd4t5znd'
 };
+});
+
+;require.register("lib/router", function(exports, require, module) {
+var __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+exports.Router = (function(_super) {
+  __extends(Router, _super);
+
+  function Router() {
+    return Router.__super__.constructor.apply(this, arguments);
+  }
+
+  Router.prototype.routes = {
+    '': 'noStops',
+    ':stops': 'predictions'
+  };
+
+  Router.prototype.navigate = function(route) {
+    return Router.__super__.navigate.call(this, route, {
+      trigger: true
+    });
+  };
+
+  Router.prototype.noStops = function() {
+    return console.log('No Stops Selected');
+  };
+
+  Router.prototype.predictions = function(stops) {
+    return app.getPredictions(stops);
+  };
+
+  return Router;
+
+})(Backbone.Router);
 });
 
 ;require.register("models/prediction-model", function(exports, require, module) {
@@ -314,11 +387,16 @@ exports.GlobalView = (function(_super) {
   GlobalView.prototype.render = function() {
     this.$el.html(this.template());
     this.$logo = this.$('#logo');
+    this.$wrapper = this.$('.wrapper');
     return this;
   };
 
-  GlobalView.prototype.addStopView = function() {
-    return this.$el.append(app.views.stop.el);
+  GlobalView.prototype.showPredictions = function(stops) {
+    return console.log(stops);
+  };
+
+  GlobalView.prototype.addPredictionsView = function() {
+    return this.$wrapper.append(app.views.predictions.el);
   };
 
   return GlobalView;
@@ -366,7 +444,7 @@ exports.PredictionView = (function(_super) {
 })(BaseView);
 });
 
-;require.register("views/stop-view", function(exports, require, module) {
+;require.register("views/predictions-view", function(exports, require, module) {
 var BaseView, PredictionView, Stop,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -377,26 +455,25 @@ BaseView = require('views/base-view').BaseView;
 
 PredictionView = require('views/prediction-view').PredictionView;
 
-exports.StopView = (function(_super) {
-  __extends(StopView, _super);
+exports.PredictionsView = (function(_super) {
+  __extends(PredictionsView, _super);
 
-  function StopView() {
-    return StopView.__super__.constructor.apply(this, arguments);
+  function PredictionsView() {
+    return PredictionsView.__super__.constructor.apply(this, arguments);
   }
 
-  StopView.prototype.id = 'stop';
+  PredictionsView.prototype.id = 'predictions';
 
-  StopView.prototype.Model = Stop;
+  PredictionsView.prototype.templateName = 'predictions';
 
-  StopView.prototype.SubView = PredictionView;
+  PredictionsView.prototype.SubView = PredictionView;
 
-  StopView.prototype.templateName = 'predictions';
+  PredictionsView.prototype.Model = Stop;
 
-  StopView.prototype.render = function(data) {
+  PredictionsView.prototype.render = function(predictions) {
     var fragment, prediction, _i, _len, _ref;
-    StopView.__super__.render.apply(this, arguments);
-    this.stopName = data.get('StopName');
-    this.predictions = data.get('Predictions');
+    this.predictions = predictions;
+    PredictionsView.__super__.render.apply(this, arguments);
     this.subViews = [];
     this.$predictionList = this.$('#prediction-list');
     fragment = document.createDocumentFragment();
@@ -409,13 +486,13 @@ exports.StopView = (function(_super) {
     return this;
   };
 
-  StopView.prototype.makeSubView = function(prediction) {
+  PredictionsView.prototype.makeSubView = function(prediction) {
     var subView;
     this.subViews.push(subView = new this.SubView(prediction));
     return subView.render().el;
   };
 
-  return StopView;
+  return PredictionsView;
 
 })(BaseView);
 });
