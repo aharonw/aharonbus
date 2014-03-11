@@ -10,7 +10,6 @@ class exports.Predictions extends BaseCollection
   url: =>
     apiKey = config.wmataKey
     stopID = @stopID
-    console.log @path
     return @path + 'NextBusService.svc/json/JPredictions?StopID=' + stopID + '&api_key=' + apiKey
 
 
@@ -36,12 +35,10 @@ class exports.Predictions extends BaseCollection
   poll: ->
     setTimeout =>
       @fetchPredictions @stopIDs.split '+'
-      console.log 'fetch'
     , 10000
 
 
   updatePredictions: ->
-    console.log 'update'
     @fetch
       success : @showShit
       error   : @awful
@@ -54,6 +51,8 @@ class exports.Predictions extends BaseCollection
         p.stop = stop.StopName
         @predictions.push p
 
+    @predictions = _.sortBy @predictions, (p) -> return p.Minutes
+    @predictions = @predictions.slice 0, 9
     app.views.predictions.render(@predictions).el
 
 

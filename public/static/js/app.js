@@ -188,7 +188,6 @@ exports.Predictions = (function(_super) {
     var apiKey, stopID;
     apiKey = config.wmataKey;
     stopID = this.stopID;
-    console.log(this.path);
     return this.path + 'NextBusService.svc/json/JPredictions?StopID=' + stopID + '&api_key=' + apiKey;
   };
 
@@ -220,14 +219,12 @@ exports.Predictions = (function(_super) {
   Predictions.prototype.poll = function() {
     return setTimeout((function(_this) {
       return function() {
-        _this.fetchPredictions(_this.stopIDs.split('+'));
-        return console.log('fetch');
+        return _this.fetchPredictions(_this.stopIDs.split('+'));
       };
     })(this), 10000);
   };
 
   Predictions.prototype.updatePredictions = function() {
-    console.log('update');
     return this.fetch({
       success: this.showShit,
       error: this.awful
@@ -247,6 +244,10 @@ exports.Predictions = (function(_super) {
         this.predictions.push(p);
       }
     }
+    this.predictions = _.sortBy(this.predictions, function(p) {
+      return p.Minutes;
+    });
+    this.predictions = this.predictions.slice(0, 9);
     return app.views.predictions.render(this.predictions).el;
   };
 
@@ -522,7 +523,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),prediction = locals_.prediction;
-buf.push("<div class=\"minutes\">" + (jade.escape((jade_interp = prediction.Minutes) == null ? '' : jade_interp)) + "</div>");;return buf.join("");
+buf.push("<div class=\"minutes\">" + (jade.escape((jade_interp = prediction.Minutes) == null ? '' : jade_interp)) + "m</div><div class=\"route\">" + (jade.escape((jade_interp = prediction.RouteID) == null ? '' : jade_interp)) + "</div><div class=\"stop\">" + (jade.escape((jade_interp = prediction.stop) == null ? '' : jade_interp)) + "</div>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {

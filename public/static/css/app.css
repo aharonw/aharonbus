@@ -41,21 +41,49 @@ a:hover {
 
 
 body {
-  padding: 20px;
+  padding: 0;
 }
 ul#prediction-list li {
-  width: 150px;
+  width: 100%;
   height: 150px;
   color: #fff;
-  font-weight: bold;
+  font-weight: 100;
   font-size: 65px;
   text-align: center;
   padding: 30px;
-  background-color: #ddd;
-  border: 1px solid #bbb;
-  margin-right: 20px;
-  margin-bottom: 20px;
+  background-color: #f7d3ff;
+  border-bottom: 1px solid #fff;
   float: left;
+  position: relative;
+}
+ul#prediction-list li .route {
+  font-size: 16px;
+  border-radius: 3px;
+  padding: 3px;
+  border: 1px solid #fff;
+  font-weight: 400;
+  position: absolute;
+  right: 40px;
+  top: 65px;
+}
+ul#prediction-list li .stop {
+  font-size: 12px;
+  font-weight: 400;
+}
+ul#prediction-list li:nth-child(1) {
+  background-color: #f500ff;
+}
+ul#prediction-list li:nth-child(2) {
+  background-color: #f965ff;
+}
+ul#prediction-list li:nth-child(3) {
+  background-color: #fa89ff;
+}
+ul#prediction-list li:nth-child(4) {
+  background-color: #f8b1ff;
+}
+ul#prediction-list li:nth-child(5) {
+  background-color: #f7d3ff;
 }
 
 #content {
@@ -70,7 +98,7 @@ ul#prediction-list li {
   filter: none;
 }
 .wrapper {
-  max-width: 480px;
+  max-width: 100%;
   min-height: 200px;
   border: 1px solid #eee;
   margin: 0 auto;
